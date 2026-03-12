@@ -9,7 +9,14 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 
 app.get("/api/employees", (req, res) => {
-  const { search, department, sort = "id", order = "asc" } = req.query;
+  const {
+    search,
+    department,
+    sort = "id",
+    order = "asc",
+    page = 1,
+    limit = 5,
+  } = req.query;
 
   const allowedSort = [
     "id",
@@ -23,24 +30,54 @@ app.get("/api/employees", (req, res) => {
   const sortCol = allowedSort.includes(sort) ? sort : "id";
   const sortOrder = allowedOrder.includes(order) ? order : "asc";
 
-  let query = "SELECT * FROM employees WHERE 1=1";
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  const offset = (pageNum - 1) * limitNum;
+
+  let where = "WHERE 1=1";
   const params = [];
 
   if (search) {
-    query += " AND (name LIKE ? OR position LIKE ? OR email LIKE ?)";
+    where += " AND (name LIKE ? OR position LIKE ? OR email LIKE ?)";
     const like = `%${search}%`;
     params.push(like, like, like);
   }
 
   if (department && department !== "all") {
-    query += " AND department = ?";
+    where += " AND department = ?";
     params.push(department);
   }
 
-  query += ` ORDER BY ${sortCol} ${sortOrder.toUpperCase()}`;
+  // total count for pagination
+  const total = db
+    .prepare(
+      `
+    SELECT COUNT(*) as count
+    FROM employees
+    ${where}
+  `,
+    )
+    .get(...params).count;
 
-  const employees = db.prepare(query).all(...params);
-  res.json(employees);
+  const employees = db
+    .prepare(
+      `
+    SELECT *
+    FROM employees
+    ${where}
+    ORDER BY ${sortCol} ${sortOrder.toUpperCase()}
+    LIMIT ?
+    OFFSET ?
+  `,
+    )
+    .all(...params, limitNum, offset);
+
+  res.json({
+    data: employees,
+    total,
+    page: pageNum,
+    totalPages: Math.ceil(total / limitNum),
+  });
 });
 
 app.get("/api/departments", (req, res) => {

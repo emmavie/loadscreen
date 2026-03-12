@@ -398,6 +398,33 @@
     .delete-btn:hover {
       background: #b52a38;
     }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .pagination button {
+      padding: 8px 14px;
+      border: none;
+      background: #0f3460;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .pagination button:disabled {
+      background: #bbb;
+      cursor: not-allowed;
+    }
+
+    #pageIndicator {
+      font-size: 0.9rem;
+      color: #666;
+    }
   </style>
 </head>
 <div id="employeeModal" class="modal">
@@ -530,7 +557,15 @@
         </tbody>
       </table>
     </div>
+    <div class="pagination">
 
+      <button id="prevPage">Previous</button>
+
+      <span id="pageIndicator"></span>
+
+      <button id="nextPage">Next</button>
+
+    </div>
   </div>
 
   <script>
@@ -547,6 +582,15 @@
     let sortCol = 'id';
     let sortOrder = 'asc';
     let allEmployees = [];
+
+    // new variables at the top
+    let formMode = "create";
+    let editingEmployeeId = null;
+
+    let currentPage = 1;
+    const rowsPerPage = 5;
+    let totalPages = 1;
+
 
     function avatarColor(name) {
       let h = 0;
@@ -655,9 +699,22 @@
     async function loadEmployees() {
       const search = document.getElementById('searchInput').value;
       const department = document.getElementById('deptFilter').value;
-      const params = new URLSearchParams({ search, department, sort: sortCol, order: sortOrder });
+
+
+      const params = new URLSearchParams({
+        search,
+        department,
+        sort: sortCol,
+        order: sortOrder,
+        page: currentPage,
+        limit: rowsPerPage
+      });
+
       const res = await fetch(`/api/employees?${params}`);
-      allEmployees = await res.json();
+      const result = await res.json();
+      allEmployees = result.data;   // only the array
+      totalPages = result.totalPages; // update total pages
+      updatePagination();           // update buttons and indicator
       renderTable(allEmployees);
 
       if (department === 'all' && !search) {
@@ -695,10 +752,6 @@
 
 
     //new changes
-
-    let formMode = "create";
-    let editingEmployeeId = null;
-
 
     // Add employee modal logic
     const modal = document.getElementById("employeeModal");
@@ -869,6 +922,47 @@
       }
 
     });
+
+
+    // Pagination logic
+    function updatePagination() {
+      document.getElementById("pageIndicator").textContent =
+        `Page ${currentPage} of ${totalPages}`;
+
+      document.getElementById("prevPage").disabled = currentPage === 1;
+      document.getElementById("nextPage").disabled = currentPage === totalPages;
+    }
+    // Pagination Buttons
+    document.getElementById("prevPage").addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        loadEmployees();
+      }
+    });
+
+    document.getElementById("nextPage").addEventListener("click", () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        loadEmployees();
+      }
+    });
+
+    // reset page on search 
+    // Search input
+    document.getElementById('searchInput').addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        currentPage = 1;
+        loadEmployees();
+      }, 250);
+    });
+
+    // Department filter
+    document.getElementById('deptFilter').addEventListener('change', () => {
+      currentPage = 1;
+      loadEmployees();
+    });
+
   </script>
 
 </body>
