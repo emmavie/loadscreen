@@ -57,7 +57,8 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 20px;
+      align-items: stretch;
     }
 
     .stat-card {
@@ -67,7 +68,10 @@
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      margin: 0;
     }
 
     .stat-card .label {
@@ -520,6 +524,13 @@
         <span class="label">Avg. Salary</span>
         <span class="value" id="statSalary">—</span>
       </div>
+      <div class="stat-card">
+        <span class="label" style="display:block;">Salary by Department</span>
+        <div style="display:flex; align-items:center; gap:32px; flex-wrap:wrap;">
+          <canvas id="salaryPieChart" width="220" height="220"></canvas>
+          <div id="pieChartLegend" style="display:flex;flex-direction:column;"></div>
+        </div>
+      </div>
     </div>
 
     <div class="toolbar">
@@ -717,11 +728,9 @@
       updatePagination();           // update buttons and indicator
       renderTable(allEmployees);
 
-      if (department === 'all' && !search) {
-        document.getElementById('statTotal').textContent = allEmployees.length;
-        const avg = allEmployees.reduce((s, e) => s + e.salary, 0) / (allEmployees.length || 1);
-        document.getElementById('statSalary').textContent = '$' + Math.round(avg / 1000) + 'k';
-      }
+
+      // adding pie chart here
+      drawPieChart();
     }
 
     document.querySelectorAll('thead th[data-col]').forEach(th => {
@@ -747,13 +756,14 @@
     document.getElementById('deptFilter').addEventListener('change', loadEmployees);
 
     updateSortHeaders();
+    loadStats();
     loadDepartments();
     loadEmployees();
 
 
     //new changes
 
-    // Add employee modal logic
+    // Task 1 -Add employee modal logic
     const modal = document.getElementById("employeeModal");
     const openBtn = document.getElementById("openModalBtn");
     const closeBtn = document.getElementById("closeModalBtn");
@@ -826,6 +836,7 @@
         document.getElementById("employeeForm").reset();
 
         loadEmployees();
+        loadStats();
 
       } catch (err) {
 
@@ -843,7 +854,7 @@
       phoneInput.value = phoneInput.value.replace(/\D/g, "");
     });
 
-    // Edit button logic
+    // Task 2 -Edit button logic
     document.addEventListener("click", async (e) => {
 
       if (!e.target.classList.contains("edit-btn")) return;
@@ -889,7 +900,7 @@
     });
 
 
-    // Delete button logic
+    // Task 3 - Delete button logic
     document.addEventListener("click", async (e) => {
 
       if (!e.target.classList.contains("delete-btn")) return;
@@ -914,6 +925,7 @@
         }
 
         loadEmployees();
+        loadStats();
 
       } catch (err) {
 
@@ -924,7 +936,7 @@
     });
 
 
-    // Pagination logic
+    // Task 4 - Pagination logic
     function updatePagination() {
       document.getElementById("pageIndicator").textContent =
         `Page ${currentPage} of ${totalPages}`;
@@ -962,6 +974,41 @@
       currentPage = 1;
       loadEmployees();
     });
+
+    // Task 5 - Salary distribution pie chart
+    async function drawPieChart() {
+      const res = await fetch('/api/salary-by-department');
+      const data = await res.json();
+
+      const canvas = document.getElementById('salaryPieChart');
+      const ctx = canvas.getContext('2d');
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const radius = 90;
+      const total = data.reduce((sum, d) => sum + d.total, 0);
+      const colors = ['#1565c0', '#c2185b', '#2e7d32', '#f57f17', '#6a1b9a'];
+
+      let angle = -Math.PI / 2;
+
+      data.forEach((dept, i) => {
+        const slice = (dept.total / total) * 2 * Math.PI;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, angle, angle + slice);
+        ctx.closePath();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+        angle += slice;
+      });
+    }
+
+    // to get stats for all employees 
+    async function loadStats() {
+      const res = await fetch('/api/stats');
+      const { total, avgSalary } = await res.json();
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statSalary').textContent = '$' + Math.round(avgSalary / 1000) + 'k';
+    }
 
   </script>
 

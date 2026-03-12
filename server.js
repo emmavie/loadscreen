@@ -8,6 +8,7 @@ const PORT = 3000;
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 
+// Task 4 - add pagination
 app.get("/api/employees", (req, res) => {
   const {
     search,
@@ -87,7 +88,6 @@ app.get("/api/departments", (req, res) => {
   res.json(departments.map((d) => d.department));
 });
 
-// new changes
 app.post("/api/employees", (req, res) => {
   const { name, department, position, email, phone, hire_date, salary } =
     req.body;
@@ -142,7 +142,7 @@ app.post("/api/employees", (req, res) => {
   }
 });
 
-// edit employee
+// Task 2 - edit employee
 app.put("/api/employees/:id", (req, res) => {
   const { id } = req.params;
 
@@ -211,7 +211,7 @@ app.put("/api/employees/:id", (req, res) => {
   }
 });
 
-// delete employee
+// Task 3 - delete employee
 app.delete("/api/employees/:id", (req, res) => {
   const { id } = req.params;
 
@@ -239,6 +239,34 @@ app.delete("/api/employees/:id", (req, res) => {
       error: "Failed to delete employee.",
     });
   }
+});
+
+// Task 5-  salary by department
+app.get("/api/salary-by-department", (req, res) => {
+  const rows = db
+    .prepare(
+      `
+    SELECT department, SUM(salary) as total
+    FROM employees
+    GROUP BY department
+    ORDER BY total DESC
+  `,
+    )
+    .all();
+  res.json(rows);
+});
+
+// get full stats
+app.get("/api/stats", (req, res) => {
+  const row = db
+    .prepare(
+      `
+    SELECT COUNT(*) as total, AVG(salary) as avgSalary
+    FROM employees
+  `,
+    )
+    .get();
+  res.json(row);
 });
 
 app.listen(PORT, () => {
