@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Employee Directory</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -21,10 +28,12 @@
       display: flex;
       align-items: center;
       gap: 16px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
     }
 
-    header svg { flex-shrink: 0; }
+    header svg {
+      flex-shrink: 0;
+    }
 
     header h1 {
       font-size: 1.6rem;
@@ -55,7 +64,7 @@
       background: white;
       border-radius: 12px;
       padding: 20px 24px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -85,7 +94,7 @@
       flex-wrap: wrap;
       align-items: center;
       margin-bottom: 20px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     }
 
     .search-wrap {
@@ -113,7 +122,9 @@
       transition: border-color 0.2s;
     }
 
-    .search-wrap input:focus { border-color: #0f3460; }
+    .search-wrap input:focus {
+      border-color: #0f3460;
+    }
 
     select {
       padding: 10px 14px;
@@ -126,7 +137,9 @@
       transition: border-color 0.2s;
     }
 
-    select:focus { border-color: #0f3460; }
+    select:focus {
+      border-color: #0f3460;
+    }
 
     #resultCount {
       font-size: 0.85rem;
@@ -138,7 +151,7 @@
     .table-wrap {
       background: white;
       border-radius: 12px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
       overflow: hidden;
     }
 
@@ -163,18 +176,33 @@
       transition: background 0.15s;
     }
 
-    thead th:hover { background: #eef0f4; }
+    thead th:hover {
+      background: #eef0f4;
+    }
 
-    thead th .sort-icon { margin-left: 4px; opacity: 0.4; font-size: 0.7rem; }
-    thead th.active .sort-icon { opacity: 1; color: #0f3460; }
+    thead th .sort-icon {
+      margin-left: 4px;
+      opacity: 0.4;
+      font-size: 0.7rem;
+    }
+
+    thead th.active .sort-icon {
+      opacity: 1;
+      color: #0f3460;
+    }
 
     tbody tr {
       border-bottom: 1px solid #f0f0f0;
       transition: background 0.12s;
     }
 
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: #f7f8fc; }
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: #f7f8fc;
+    }
 
     td {
       padding: 14px 16px;
@@ -201,8 +229,14 @@
       gap: 12px;
     }
 
-    .name-cell .name { font-weight: 600; }
-    .name-cell .email { font-size: 0.8rem; color: #888; }
+    .name-cell .name {
+      font-weight: 600;
+    }
+
+    .name-cell .email {
+      font-size: 0.8rem;
+      color: #888;
+    }
 
     .badge {
       display: inline-block;
@@ -218,8 +252,14 @@
       color: #aaa;
     }
 
-    .empty-state svg { margin-bottom: 12px; opacity: 0.4; }
-    .empty-state p { font-size: 1rem; }
+    .empty-state svg {
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 1rem;
+    }
 
     #loadingRow td {
       text-align: center;
@@ -229,121 +269,283 @@
     }
 
     @media (max-width: 700px) {
-      .container { padding: 0 12px; }
-      td:nth-child(4), th:nth-child(4),
-      td:nth-child(6), th:nth-child(6) { display: none; }
+      .container {
+        padding: 0 12px;
+      }
+
+      td:nth-child(4),
+      th:nth-child(4),
+      td:nth-child(6),
+      th:nth-child(6) {
+        display: none;
+      }
+    }
+
+
+    .primary-btn {
+      background: #0f3460;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .primary-btn:hover {
+      background: #0c2b4f;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      width: 520px;
+      max-width: 90%;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .close-btn {
+      border: none;
+      background: none;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .field label {
+      font-size: 0.8rem;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .field input,
+    .field select {
+      padding: 9px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #0f3460;
+      outline: none;
+    }
+
+    .form-actions {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
   </style>
 </head>
-<body>
+<div id="employeeModal" class="modal">
+  <div class="modal-content">
 
-<header>
-  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-    <circle cx="18" cy="18" r="18" fill="rgba(255,255,255,0.1)"/>
-    <circle cx="18" cy="14" r="5" fill="white" opacity="0.9"/>
-    <path d="M8 28c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
-  </svg>
-  <div>
-    <h1>Employee Directory</h1>
-    <p>Manage and view all company employees</p>
-  </div>
-</header>
-
-<div class="container">
-
-  <div class="stats-row" id="statsRow">
-    <div class="stat-card">
-      <span class="label">Total Employees</span>
-      <span class="value" id="statTotal">—</span>
+    <div class="modal-header">
+      <h2>Add Employee</h2>
+      <button id="closeModalBtn" class="close-btn">&times;</button>
     </div>
-    <div class="stat-card">
-      <span class="label">Departments</span>
-      <span class="value" id="statDepts">—</span>
-    </div>
-    <div class="stat-card">
-      <span class="label">Avg. Salary</span>
-      <span class="value" id="statSalary">—</span>
-    </div>
-  </div>
 
-  <div class="toolbar">
-    <div class="search-wrap">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-      </svg>
-      <input type="text" id="searchInput" placeholder="Search by name, position, or email…" />
-    </div>
-    <select id="deptFilter">
-      <option value="all">All Departments</option>
-    </select>
-    <span id="resultCount"></span>
-  </div>
+    <form id="employeeForm">
 
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th data-col="id">ID <span class="sort-icon">▲</span></th>
-          <th data-col="name">Employee <span class="sort-icon">▲</span></th>
-          <th data-col="department">Department <span class="sort-icon">▲</span></th>
-          <th data-col="position">Position <span class="sort-icon">▲</span></th>
-          <th data-col="hire_date">Hire Date <span class="sort-icon">▲</span></th>
-          <th data-col="salary">Salary <span class="sort-icon">▲</span></th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr id="loadingRow"><td colspan="6">Loading employees…</td></tr>
-      </tbody>
-    </table>
-  </div>
+      <div class="form-grid">
 
+        <div class="field">
+          <label>Name *</label>
+          <input type="text" id="name" required>
+        </div>
+
+        <div class="field">
+          <label>Email *</label>
+          <input type="email" id="email" required>
+        </div>
+
+        <div class="field">
+          <label>Department *</label>
+          <select id="department" required>
+            <option value="">Select department</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Position *</label>
+          <input type="text" id="position" required>
+        </div>
+
+        <div class="field">
+          <label>Phone</label>
+          <input type="tel" id="phone" inputmode="numeric" maxlength="15" pattern="[0-9]*" placeholder="Digits only" />
+        </div>
+
+        <div class="field">
+          <label>Hire Date *</label>
+          <input type="date" id="hire_date" required>
+        </div>
+
+        <div class="field">
+          <label>Salary *</label>
+          <input type="number" id="salary" min="0" required>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="primary-btn">+ Add Employee</button>
+        <span id="formMessage"></span>
+      </div>
+
+    </form>
+
+  </div>
 </div>
 
-<script>
-  const DEPT_COLORS = {
-    'Engineering': ['#e8f4fd', '#1565c0'],
-    'Marketing':   ['#fce4ec', '#c2185b'],
-    'HR':          ['#e8f5e9', '#2e7d32'],
-    'Finance':     ['#fff8e1', '#f57f17'],
-    'Design':      ['#f3e5f5', '#6a1b9a'],
-  };
+<body>
 
-  const AVATAR_COLORS = ['#e63946','#2196f3','#4caf50','#ff9800','#9c27b0','#00bcd4','#795548','#607d8b','#f06292','#26a69a'];
+  <header>
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <circle cx="18" cy="18" r="18" fill="rgba(255,255,255,0.1)" />
+      <circle cx="18" cy="14" r="5" fill="white" opacity="0.9" />
+      <path d="M8 28c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="white" stroke-width="2" stroke-linecap="round"
+        opacity="0.9" />
+    </svg>
+    <div>
+      <h1>Employee Directory</h1>
+      <p>Manage and view all company employees</p>
+    </div>
+  </header>
 
-  let sortCol = 'id';
-  let sortOrder = 'asc';
-  let allEmployees = [];
+  <div class="container">
 
-  function avatarColor(name) {
-    let h = 0;
-    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
-    return AVATAR_COLORS[h % AVATAR_COLORS.length];
-  }
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card">
+        <span class="label">Total Employees</span>
+        <span class="value" id="statTotal">—</span>
+      </div>
+      <div class="stat-card">
+        <span class="label">Departments</span>
+        <span class="value" id="statDepts">—</span>
+      </div>
+      <div class="stat-card">
+        <span class="label">Avg. Salary</span>
+        <span class="value" id="statSalary">—</span>
+      </div>
+    </div>
 
-  function initials(name) {
-    return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
-  }
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.35-4.35" />
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search by name, position, or email…" />
+      </div>
+      <select id="deptFilter">
+        <option value="all">All Departments</option>
+      </select>
+      <button id="openModalBtn" class="primary-btn">+ Add Employee</button>
+      <span id="resultCount"></span>
+    </div>
 
-  function deptBadge(dept) {
-    const [bg, text] = DEPT_COLORS[dept] || ['#e0e0e0', '#555'];
-    return `<span class="badge" style="background:${bg};color:${text}">${dept}</span>`;
-  }
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-col="id">ID <span class="sort-icon">▲</span></th>
+            <th data-col="name">Employee <span class="sort-icon">▲</span></th>
+            <th data-col="department">Department <span class="sort-icon">▲</span></th>
+            <th data-col="position">Position <span class="sort-icon">▲</span></th>
+            <th data-col="hire_date">Hire Date <span class="sort-icon">▲</span></th>
+            <th data-col="salary">Salary <span class="sort-icon">▲</span></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr id="loadingRow">
+            <td colspan="6">Loading employees…</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  function formatDate(d) {
-    const [y, m, day] = d.split('-');
-    return `${day}/${m}/${y}`;
-  }
+  </div>
 
-  function formatSalary(n) {
-    return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0 });
-  }
+  <script>
+    const DEPT_COLORS = {
+      'Engineering': ['#e8f4fd', '#1565c0'],
+      'Marketing': ['#fce4ec', '#c2185b'],
+      'HR': ['#e8f5e9', '#2e7d32'],
+      'Finance': ['#fff8e1', '#f57f17'],
+      'Design': ['#f3e5f5', '#6a1b9a'],
+    };
 
-  function renderTable(employees) {
-    const tbody = document.getElementById('tableBody');
-    document.getElementById('resultCount').textContent = `${employees.length} result${employees.length !== 1 ? 's' : ''}`;
+    const AVATAR_COLORS = ['#e63946', '#2196f3', '#4caf50', '#ff9800', '#9c27b0', '#00bcd4', '#795548', '#607d8b', '#f06292', '#26a69a'];
 
-    if (employees.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6">
+    let sortCol = 'id';
+    let sortOrder = 'asc';
+    let allEmployees = [];
+
+    function avatarColor(name) {
+      let h = 0;
+      for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+      return AVATAR_COLORS[h % AVATAR_COLORS.length];
+    }
+
+    function initials(name) {
+      return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+    }
+
+    function deptBadge(dept) {
+      const [bg, text] = DEPT_COLORS[dept] || ['#e0e0e0', '#555'];
+      return `<span class="badge" style="background:${bg};color:${text}">${dept}</span>`;
+    }
+
+    function formatDate(d) {
+      const [y, m, day] = d.split('-');
+      return `${day}/${m}/${y}`;
+    }
+
+    function formatSalary(n) {
+      return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0 });
+    }
+
+    function renderTable(employees) {
+      const tbody = document.getElementById('tableBody');
+      document.getElementById('resultCount').textContent = `${employees.length} result${employees.length !== 1 ? 's' : ''}`;
+
+      if (employees.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6">
         <div class="empty-state">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
@@ -351,10 +553,10 @@
           <p>No employees match your search.</p>
         </div>
       </td></tr>`;
-      return;
-    }
+        return;
+      }
 
-    tbody.innerHTML = employees.map(emp => `
+      tbody.innerHTML = employees.map(emp => `
       <tr>
         <td style="color:#aaa;font-size:0.82rem">#${emp.id}</td>
         <td>
@@ -372,74 +574,169 @@
         <td style="font-weight:600">${formatSalary(emp.salary)}</td>
       </tr>
     `).join('');
-  }
-
-  function updateSortHeaders() {
-    document.querySelectorAll('thead th').forEach(th => {
-      const col = th.dataset.col;
-      th.classList.toggle('active', col === sortCol);
-      const icon = th.querySelector('.sort-icon');
-      if (col === sortCol) {
-        icon.textContent = sortOrder === 'asc' ? '▲' : '▼';
-      } else {
-        icon.textContent = '▲';
-      }
-    });
-  }
-
-  async function loadDepartments() {
-    const res = await fetch('/api/departments');
-    const depts = await res.json();
-    const sel = document.getElementById('deptFilter');
-    depts.forEach(d => {
-      const opt = document.createElement('option');
-      opt.value = d; opt.textContent = d;
-      sel.appendChild(opt);
-    });
-    document.getElementById('statDepts').textContent = depts.length;
-  }
-
-  async function loadEmployees() {
-    const search = document.getElementById('searchInput').value;
-    const department = document.getElementById('deptFilter').value;
-    const params = new URLSearchParams({ search, department, sort: sortCol, order: sortOrder });
-    const res = await fetch(`/api/employees?${params}`);
-    allEmployees = await res.json();
-    renderTable(allEmployees);
-
-    if (department === 'all' && !search) {
-      document.getElementById('statTotal').textContent = allEmployees.length;
-      const avg = allEmployees.reduce((s, e) => s + e.salary, 0) / (allEmployees.length || 1);
-      document.getElementById('statSalary').textContent = '$' + Math.round(avg / 1000) + 'k';
     }
-  }
 
-  document.querySelectorAll('thead th[data-col]').forEach(th => {
-    th.addEventListener('click', () => {
-      const col = th.dataset.col;
-      if (sortCol === col) {
-        sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-      } else {
-        sortCol = col;
-        sortOrder = 'asc';
+    function updateSortHeaders() {
+      document.querySelectorAll('thead th').forEach(th => {
+        const col = th.dataset.col;
+        th.classList.toggle('active', col === sortCol);
+        const icon = th.querySelector('.sort-icon');
+        if (col === sortCol) {
+          icon.textContent = sortOrder === 'asc' ? '▲' : '▼';
+        } else {
+          icon.textContent = '▲';
+        }
+      });
+    }
+
+    async function loadDepartments() {
+      const res = await fetch('/api/departments');
+      const depts = await res.json();
+
+      const filterSel = document.getElementById('deptFilter');
+      const formSel = document.getElementById('department');
+
+      depts.forEach(d => {
+
+        const opt1 = document.createElement('option');
+        opt1.value = d;
+        opt1.textContent = d;
+        filterSel.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = d;
+        opt2.textContent = d;
+        formSel.appendChild(opt2);
+
+      });
+
+      document.getElementById('statDepts').textContent = depts.length;
+    }
+
+    async function loadEmployees() {
+      const search = document.getElementById('searchInput').value;
+      const department = document.getElementById('deptFilter').value;
+      const params = new URLSearchParams({ search, department, sort: sortCol, order: sortOrder });
+      const res = await fetch(`/api/employees?${params}`);
+      allEmployees = await res.json();
+      renderTable(allEmployees);
+
+      if (department === 'all' && !search) {
+        document.getElementById('statTotal').textContent = allEmployees.length;
+        const avg = allEmployees.reduce((s, e) => s + e.salary, 0) / (allEmployees.length || 1);
+        document.getElementById('statSalary').textContent = '$' + Math.round(avg / 1000) + 'k';
       }
-      updateSortHeaders();
-      loadEmployees();
+    }
+
+    document.querySelectorAll('thead th[data-col]').forEach(th => {
+      th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        if (sortCol === col) {
+          sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortCol = col;
+          sortOrder = 'asc';
+        }
+        updateSortHeaders();
+        loadEmployees();
+      });
     });
-  });
 
-  let debounceTimer;
-  document.getElementById('searchInput').addEventListener('input', () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(loadEmployees, 250);
-  });
+    let debounceTimer;
+    document.getElementById('searchInput').addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(loadEmployees, 250);
+    });
 
-  document.getElementById('deptFilter').addEventListener('change', loadEmployees);
+    document.getElementById('deptFilter').addEventListener('change', loadEmployees);
 
-  updateSortHeaders();
-  loadDepartments();
-  loadEmployees();
-</script>
+    updateSortHeaders();
+    loadDepartments();
+    loadEmployees();
+
+
+    //new changes
+    // Add employee modal logic
+    const modal = document.getElementById("employeeModal");
+    const openBtn = document.getElementById("openModalBtn");
+    const closeBtn = document.getElementById("closeModalBtn");
+
+    openBtn.addEventListener("click", () => {
+      modal.classList.add("active");
+    });
+
+    closeBtn.addEventListener("click", () => {
+      modal.classList.remove("active");
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.remove("active");
+      }
+    });
+
+    // Add employee form submission logic
+    document.getElementById("employeeForm").addEventListener("submit", async (e) => {
+
+      e.preventDefault();
+
+      const message = document.getElementById("formMessage");
+      message.textContent = "";
+
+      const employee = {
+        name: document.getElementById("name").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        department: document.getElementById("department").value,
+        position: document.getElementById("position").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        hire_date: document.getElementById("hire_date").value,
+        salary: document.getElementById("salary").value
+      };
+
+      try {
+
+        const res = await fetch("/api/employees", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(employee)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          message.style.color = "#c62828";
+          message.textContent = data.error || "Failed to add employee.";
+          return;
+        }
+
+        message.style.color = "#2e7d32";
+        message.textContent = "Employee added successfully.";
+        modal.classList.remove("active");
+
+        document.getElementById("employeeForm").reset();
+
+        loadEmployees();
+
+      } catch (err) {
+
+        message.style.color = "#c62828";
+        message.textContent = "Server error. Please try again.";
+
+      }
+
+    });
+
+    //phone input validation to allow only digits
+    const phoneInput = document.getElementById("phone");
+
+    phoneInput.addEventListener("input", () => {
+      phoneInput.value = phoneInput.value.replace(/\D/g, "");
+    });
+
+  </script>
 
 </body>
+
 </html>
