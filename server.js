@@ -88,6 +88,7 @@ app.get("/api/departments", (req, res) => {
   res.json(departments.map((d) => d.department));
 });
 
+// Task 1 - add employee
 app.post("/api/employees", (req, res) => {
   const { name, department, position, email, phone, hire_date, salary } =
     req.body;
