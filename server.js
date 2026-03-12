@@ -174,6 +174,36 @@ app.put("/api/employees/:id", (req, res) => {
   }
 });
 
+// delete employee
+app.delete("/api/employees/:id", (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const stmt = db.prepare(`
+      DELETE FROM employees
+      WHERE id = ?
+    `);
+
+    const result = stmt.run(id);
+
+    if (result.changes === 0) {
+      return res.status(404).json({
+        error: "Employee not found.",
+      });
+    }
+
+    res.json({
+      message: "Employee deleted successfully.",
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      error: "Failed to delete employee.",
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
