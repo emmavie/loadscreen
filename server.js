@@ -105,6 +105,75 @@ app.post("/api/employees", (req, res) => {
   }
 });
 
+// edit employee
+app.put("/api/employees/:id", (req, res) => {
+  const { id } = req.params;
+
+  const { name, department, position, email, phone, hire_date, salary } =
+    req.body;
+
+  if (
+    !name ||
+    !department ||
+    !position ||
+    !email ||
+    !hire_date ||
+    salary === undefined
+  ) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  const salaryNum = parseFloat(salary);
+
+  if (isNaN(salaryNum) || salaryNum < 0) {
+    return res.status(400).json({ error: "Invalid salary." });
+  }
+
+  try {
+    const stmt = db.prepare(`
+      UPDATE employees
+      SET
+        name = ?,
+        department = ?,
+        position = ?,
+        email = ?,
+        phone = ?,
+        hire_date = ?,
+        salary = ?
+      WHERE id = ?
+    `);
+
+    const result = stmt.run(
+      name,
+      department,
+      position,
+      email,
+      phone || null,
+      hire_date,
+      salaryNum,
+      id,
+    );
+
+    if (result.changes === 0) {
+      return res.status(404).json({ error: "Employee not found." });
+    }
+
+    const updated = db.prepare("SELECT * FROM employees WHERE id = ?").get(id);
+
+    res.json(updated);
+  } catch (err) {
+    if (err.message.includes("UNIQUE constraint failed")) {
+      return res.status(409).json({
+        error: "An employee with that email already exists.",
+      });
+    }
+
+    console.error(err);
+
+    res.status(500).json({ error: "Failed to update employee." });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

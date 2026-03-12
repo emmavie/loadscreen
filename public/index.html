@@ -369,6 +369,21 @@
       align-items: center;
       gap: 10px;
     }
+
+
+    .edit-btn {
+      border: none;
+      background: #e8f4fd;
+      color: #1565c0;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .edit-btn:hover {
+      background: #d6e9fb;
+    }
   </style>
 </head>
 <div id="employeeModal" class="modal">
@@ -423,7 +438,9 @@
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="primary-btn">+ Add Employee</button>
+<!-- conditional button for form -->
+    <button type="submit" id="submitEmployeeBtn" class="primary-btn">Add Employee</button>
+        
         <span id="formMessage"></span>
       </div>
 
@@ -489,11 +506,12 @@
             <th data-col="position">Position <span class="sort-icon">▲</span></th>
             <th data-col="hire_date">Hire Date <span class="sort-icon">▲</span></th>
             <th data-col="salary">Salary <span class="sort-icon">▲</span></th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="tableBody">
           <tr id="loadingRow">
-            <td colspan="6">Loading employees…</td>
+            <td colspan="7">Loading employees…</td>
           </tr>
         </tbody>
       </table>
@@ -572,15 +590,19 @@
         <td>${emp.position}</td>
         <td>${formatDate(emp.hire_date)}</td>
         <td style="font-weight:600">${formatSalary(emp.salary)}</td>
+        <td>
+  <button class="edit-btn" data-id="${emp.id}">Edit</button>
+</td>
       </tr>
     `).join('');
     }
 
     function updateSortHeaders() {
-      document.querySelectorAll('thead th').forEach(th => {
+      document.querySelectorAll('thead th[data-col]').forEach(th => {
         const col = th.dataset.col;
         th.classList.toggle('active', col === sortCol);
         const icon = th.querySelector('.sort-icon');
+        if (!icon) return;
         if (col === sortCol) {
           icon.textContent = sortOrder === 'asc' ? '▲' : '▼';
         } else {
@@ -656,14 +678,20 @@
 
 
     //new changes
+
+    let formMode = "create";
+    let editingEmployeeId = null;
+
+
     // Add employee modal logic
     const modal = document.getElementById("employeeModal");
     const openBtn = document.getElementById("openModalBtn");
     const closeBtn = document.getElementById("closeModalBtn");
+    const submitEmployeeBtn = document.getElementById("submitEmployeeBtn");
 
-    openBtn.addEventListener("click", () => {
-      modal.classList.add("active");
-    });
+    function updateSubmitButtonLabel() {
+      submitEmployeeBtn.textContent = formMode === "edit" ? "Update Employee" : "Add Employee";
+    }
 
     closeBtn.addEventListener("click", () => {
       modal.classList.remove("active");
@@ -695,8 +723,16 @@
 
       try {
 
-        const res = await fetch("/api/employees", {
-          method: "POST",
+        let url = "/api/employees";
+        let method = "POST";
+
+        if (formMode === "edit") {
+          url = `/api/employees/${editingEmployeeId}`;
+          method = "PUT";
+        }
+
+        const res = await fetch(url, {
+          method,
           headers: {
             "Content-Type": "application/json"
           },
@@ -712,7 +748,9 @@
         }
 
         message.style.color = "#2e7d32";
-        message.textContent = "Employee added successfully.";
+        message.textContent = formMode === "edit"
+          ? "Employee updated successfully."
+          : "Employee added successfully.";
         modal.classList.remove("active");
 
         document.getElementById("employeeForm").reset();
@@ -733,6 +771,51 @@
 
     phoneInput.addEventListener("input", () => {
       phoneInput.value = phoneInput.value.replace(/\D/g, "");
+    });
+
+    // Edit button logic
+    document.addEventListener("click", async (e) => {
+
+      if (!e.target.classList.contains("edit-btn")) return;
+
+      const id = e.target.dataset.id;
+
+      const employee = allEmployees.find(emp => emp.id == id);
+
+      if (!employee) return;
+
+      formMode = "edit";
+      editingEmployeeId = id;
+
+      document.querySelector(".modal-header h2").textContent = "Edit Employee";
+      updateSubmitButtonLabel();
+
+      document.getElementById("name").value = employee.name;
+      document.getElementById("email").value = employee.email;
+      document.getElementById("department").value = employee.department;
+      document.getElementById("position").value = employee.position;
+      document.getElementById("phone").value = employee.phone || "";
+      document.getElementById("hire_date").value = employee.hire_date;
+      document.getElementById("salary").value = employee.salary;
+
+      modal.classList.add("active");
+
+    });
+
+    // Reset form and state when opening modal for creating new employee
+    openBtn.addEventListener("click", () => {
+
+      formMode = "create";
+      editingEmployeeId = null;
+
+      document.querySelector(".modal-header h2").textContent = "Add Employee";
+      updateSubmitButtonLabel();
+
+      document.getElementById("employeeForm").reset();
+      document.getElementById("formMessage").textContent = "";
+
+      modal.classList.add("active");
+
     });
 
   </script>
