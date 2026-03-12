@@ -5,7 +5,9 @@ function twoSum(nums, target) {
     if (current_sum in map) {
       return [map[current_sum], i].sort((a, b) => a - b);
     }
-    map[nums[i]] = i;
+    if (!(nums[i] in map)) {
+      map[nums[i]] = i;
+    }
   }
 }
 const test_cases = [
